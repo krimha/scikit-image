@@ -7,7 +7,8 @@ from ._hog import hog
 from .texture import (graycomatrix, graycoprops,
                       local_binary_pattern,
                       multiblock_lbp,
-                      draw_multiblock_lbp)
+                      draw_multiblock_lbp,
+                      laws_2d_kernels, laws)
 
 from .peak import peak_local_max
 from .corner import (corner_kitchen_rosenfeld, corner_harris,

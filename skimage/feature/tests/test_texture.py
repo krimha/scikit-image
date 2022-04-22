@@ -7,7 +7,8 @@ from skimage.feature import (graycomatrix,
                              greycomatrix,
                              greycoprops,
                              local_binary_pattern,
-                             multiblock_lbp)
+                             multiblock_lbp,
+                             laws, laws_2d_kernels)
 from skimage.transform import integral_image
 
 
@@ -320,3 +321,62 @@ class TestMBLBP():
         lbp_code = multiblock_lbp(int_img, 0, 0, 3, 3)
 
         np.testing.assert_equal(lbp_code, correct_answer)
+
+
+class TestLawsTEM():
+    KERNELS_2D = laws_2d_kernels()
+
+    def test_E5L5(self):
+        # Expected values taken from "Textured image segmentation"
+        expected_E5L5 = np.array([[-1, -4, -6, -4, -1],
+                                  [-2, -8, -12, -8, -2],
+                                  [ 0,  0,   0,  0,  0],
+                                  [ 2,  8,  12,  8,  2],
+                                  [ 1,  4,   6,  4,  1]])
+        np.testing.assert_equal(TestLawsTEM.KERNELS_2D['E5L5'], expected_E5L5)
+
+    def test_R5R5(self):
+        expected_R5R5 = np.array([[ 1, -4,   6, -4,  1],
+                                  [-4, 16, -24, 16, -4],
+                                  [ 6,-24,  36,-24,  6],
+                                  [-4, 16, -24, 16, -4],
+                                  [ 1, -4,   6, -4,  1]])
+        np.testing.assert_equal(TestLawsTEM.KERNELS_2D['R5R5'], expected_R5R5)
+
+    def test_E5S5(self):
+        expected_E5S5 = np.array([[ 1, 0, -2, 0,  1],
+                                  [ 2, 0, -4, 0,  2],
+                                  [ 0, 0,  0, 0,  0],
+                                  [-2, 0,  4, 0, -2],
+                                  [-1, 0,  2, 0, -1]])
+        np.testing.assert_equal(TestLawsTEM.KERNELS_2D['E5S5'], expected_E5S5)
+
+    def test_L5S5(self):
+        expected_L5S5 = np.array([[-1, 0,   2, 0, -1],
+                                  [-4, 0,   8, 0, -4],
+                                  [-6, 0,  12, 0, -6],
+                                  [-4, 0,   8, 0, -4],
+                                  [-1, 0,   2, 0, -1]])      
+        np.testing.assert_equal(TestLawsTEM.KERNELS_2D['L5S5'], expected_L5S5)
+
+
+
+    def test_output_shape(self):
+        M, N = 100, 200
+        
+        test_img = np.zeros((M, N))
+        result = laws(test_img)
+
+        expected_shape = (M,N,9)
+
+        assert result.shape == expected_shape
+
+    def test_flat_image(self):
+        """Image with no texture (i.e. constant) will return zero array"""
+
+        M, N = 100, 200
+        test_img = np.ones((M, N))
+
+        result = laws(test_img)
+        assert np.all(result==0)
+

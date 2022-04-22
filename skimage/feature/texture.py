@@ -2,6 +2,8 @@
 Methods to characterize image textures.
 """
 
+from itertools import product
+
 import numpy as np
 
 from .._shared.utils import check_nD
@@ -11,6 +13,11 @@ from ._texture import (_glcm_loop,
                        _local_binary_pattern,
                        _multiblock_lbp)
 
+
+LAWS_L5 = np.array([1, 4, 6, 4, 1])   # Level
+LAWS_E5 = np.array([-1, -2, 0, 2, 1]) # Edge
+LAWS_S5 = np.array([-1, 0, 2, 0, -1]) # Spot
+LAWS_R5 = np.array([1, -4, 6, -4, 1]) # Ripple 
 
 def graycomatrix(image, distances, angles, levels=None, symmetric=False,
                  normed=False):
@@ -500,3 +507,32 @@ def draw_multiblock_lbp(image, r, c, width, height,
             output[curr_r:curr_r+height, curr_c:curr_c+width] = new_value
 
     return output
+
+def laws_2d_kernels():
+    """Conveience function to make it easy to test
+    filter kernels"""
+
+    kernels = (
+        ('L5', LAWS_L5),
+        ('E5', LAWS_E5),
+        ('S5', LAWS_S5),
+        ('R5', LAWS_R5)
+    )
+
+    # TODO: Is this the correct way to do this. One of the examples are wrong??
+    kernels_2d = { name1+name2: np.outer(kernel1, kernel2)  for (name1, kernel1), (name2, kernel2) in product(kernels, kernels) }
+
+    return kernels_2d
+
+def laws(image, window_size=15):
+    '''Compute Laws' texture energy measures
+    
+    The most common variant, with window size 15, filter kernels of length 5
+    Normalization and rotational invariance is enabled by default
+    
+    TODO: What about the LL-map, which is usually discarded?
+    '''
+    height, width = image.shape
+
+    return np.zeros((height, width, 9))
+
